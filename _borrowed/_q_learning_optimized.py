@@ -184,3 +184,11 @@ if __name__ == "__main__":
       visualize_path(_grid, path)
     else:
       print(f"Goal not reached {path[-1]}")
+
+# TODO: 1
+# If it quickly finds a decent path (~170 steps) but never improves,
+# it might be because the Q-values aren't differentiating enough between slightly better and slightly worse paths.
+# Possible Fix: Try lowering the learning rate (α) over time so it fine-tunes instead of making big updates.
+# Another Fix: Use soft updates instead of fully overriding Q-values:
+#   Setting α closer to 0 over time (e.g., start at 0.1, decay to 0.01) can help refine the best paths.
+
