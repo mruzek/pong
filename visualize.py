@@ -18,10 +18,15 @@ def make_chart(name):
     df['gamma'] = df['gamma'].astype(float)
     df['perf'] = df['perf'].astype(float)
 
-    # Option 1: Heatmap visualization
+    # Heatmap visualization
     plt.figure(figsize=(10, 8))
     # Create a pivot table for the heatmap
     pivot_table = df.pivot_table(index='alpha', columns='gamma', values='perf', aggfunc='mean')
+
+    # Sort the index (alpha) and columns (gamma) for proper display
+    pivot_table = pivot_table.sort_index(ascending=False)  # Alpha on y-axis, decreasing from top
+    pivot_table = pivot_table.sort_index(axis=1)  # Gamma on x-axis, increasing from left to right
+
     ax = sns.heatmap(pivot_table, annot=True, cmap='viridis', cbar_kws={'label': 'Performance'})
     plt.title('Q Learning ')
     plt.xlabel('Gamma')
