@@ -37,13 +37,13 @@ from typing import Tuple, NewType, TypedDict
 class QLCfg:
     grid_size: int = 20
     goal: Tuple[int, int] = (18, 18)
-    step_reward: int = -0.01
+    step_reward: int = 0
     alpha: float = 0.1
     gamma: float = 0.9
     epsilon: float = 1.0
-    epsilon_decay: float = 0.99
+    epsilon_decay: float = 0.99 # slower would be sth like 0.999 or 0.9995
     min_epsilon: float = 0.01
-    episodes: int = 100 #low to test fails
+    episodes: int = 1000 #low to test fails
     learning_rate: float = 0.1
 
 class Actions(TypedDict):
@@ -70,7 +70,7 @@ class QL:
             state: State = (0, 0) # reset position
             done = False # finish flag
 
-            #print(f"Ep.{episode}: ε:{self.cfg.epsilon}")
+            print(f"Ep.{episode}: ε:{self.cfg.epsilon}")
             while not done:
 
             # choose action    
@@ -111,16 +111,22 @@ class QL:
             # decay epsilon
             self.cfg.epsilon = max(self.cfg.min_epsilon, self.cfg.epsilon * self.cfg.epsilon_decay)
 
-    def run(self):
-        state: State = (0, 0)
+    def run(self, start: State = None, goal: State = None):
+        if start is None:
+            start = (0, 0)
+        if goal is None:
+            goal = self.cfg.goal
+        state: State = start
         visited_states = set()
         while True:
+            print(f"{state}")
             visited_states.add(state)
             action = max(self.q_table[state], key=self.q_table[state].get)
             state = self.get_next_state(state, action)
             if state in visited_states:
                 return 0
             if state == self.cfg.goal:
+                print(f"length: {len(visited_states)}")
                 return 1 
 
     def get_next_state(self, state: Tuple[int, int], action) -> State:
@@ -134,3 +140,19 @@ class QL:
         if action == 'r' and state[0] < self.cfg.grid_size - 1:
             return (state[0]+1,state[1])
         return (state[0], state[1])
+
+if __name__ == "__main__":
+    config = QLCfg
+    agent = QL(config)
+    import time
+
+    start_time = time.time()
+    agent.train()
+    elapsed_time = time.time() - start_time
+    print(f"Training time: {elapsed_time} seconds")
+
+    print(f"default: {agent.run()}")
+    #print(f"(5, 5): {agent.run(start=(5, 5))}")
+    # for x in range(20):
+    #    for y in range(20):
+    #            print(f"({x}, {y}): {agent.run(start=(x, y))}")

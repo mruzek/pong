@@ -1,7 +1,9 @@
 import csv
+from datetime import datetime
 import sys
 from typing import Dict, Tuple
-from q_learning import QL, QLCfg
+from q_learning_optimized import QLCfg, QLOptimized
+from visualize import make_chart
 
 # TODO: BATCH TEST
 # alpha
@@ -30,34 +32,43 @@ from q_learning import QL, QLCfg
 #   Too high: The algorithm explores too much and may not converge.
 #   Too low: The algorithm may get stuck in suboptimal policies
 
-def eval_alpha_gamma(alpha_range: Tuple[float, ...], gamma_range: Tuple[float, ...]):
+
+def eval_alpha_gamma(alpha_range: Tuple[float, ...], gamma_range: Tuple[float, ...], name: None):
+    print('\nCreate alpha gamma chart')
+    print(f"α range: {alpha_range}")
+    print(f"γ range: {gamma_range}")
+    print("------------------------")
+
     res: Dict[Tuple[float, float], float] = {}
-    for a in alpha_range: 
-        for g in gamma_range:
-            res[(a, g)] = eval_cfg(QLCfg(alpha = a, gamma = g), run_count = 500)
-            print(res[(a, g)])
-            with open("log.txt", "a") as f:
-                f.write(f"({a}, {g}): {res[(a, g)]}\n")
+    if not name:
+        name = f"./results/log_{datetime.now().timestamp()}"
+    else:
+        name = f"./results/log_{name}_{datetime.now().timestamp()}"
+    with open(f"{name}.csv", "a") as f:
+        f.write("alpha, gamma, perf\n")
+        for a in alpha_range: 
+            for g in gamma_range:
+                res[(a, g)] = eval_cfg(QLCfg(alpha = a, gamma = g), 500)
+                f.write(f"{a}, {g}, {res[(a, g)]}\n")
+                print(f"Evaluated (α:{a}, γ:{g}) [{len(res) / (len(alpha_range) * len(gamma_range)) * 100:.2F}%]")
+    make_chart(name)
     return res
     
 def eval_cfg(conf: QLCfg, run_count = 100):
     succ_run_count = 0
     for run in range(run_count):
         run += 1
-        sys.stdout.write(f"\rEvaluating {run} of {run_count} [{(run) / run_count * 100:.1f}%]")
-        sys.stdout.flush()
-        agent = QL(conf)
+        #agent = QL(conf)
+        agent = QLOptimized(conf)
         agent.train()
         succ_run_count += agent.run()
-    sys.stdout.write("\n")
-    sys.stdout.flush()
     return succ_run_count / run_count
 
 if __name__ == "__main__":
     # config_default = QLCfg(
     #     grid_size = 20,
     #     goal = (18, 18),
-    #     step_penalty = 0,
+    #     step_reward = 0,
     #     alpha = 0.1,
     #     gamma = 0.9,
     #     epsilon = 1.0,
@@ -68,13 +79,10 @@ if __name__ == "__main__":
     # )
 
     # alpha, gamma
-    alpha_range = (0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 0.9, 0.99, 0.999)
+    alpha_range = (0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 0.999)
     gamma_range = (0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 0.9, 0.99, 0.999)
     range_mini = (0.1, 0.5, 0.9)
  
-    print(eval_alpha_gamma(alpha_range, gamma_range))
-    print("this was run with -0.01 step reward")
-    # TODO: 21st run ends on some function because 'd': Inf, also all keys are HUGE line +300
-
-    # caffeinate -i python your_script.py
-
+    # print(eval_alpha_gamma(range_mini, range_mini))
+    print(eval_alpha_gamma(alpha_range, gamma_range, "20_(18_18)_20_episodes"))
+    
