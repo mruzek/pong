@@ -44,15 +44,16 @@ def eval_alpha_gamma(config: QLCfg, alpha_range: Tuple[float, ...], gamma_range:
         name = f"./results/log_{datetime.now().timestamp()}"
     else:
         name = f"./results/log_{name}_{datetime.now().timestamp()}"
-    with open(f"{name}.csv", "a") as f:
+    with open(f"{name}.csv", "w") as f:
         f.write("alpha, gamma, perf\n")
-        for a in alpha_range: 
-            for g in gamma_range:
-                config.alpha = a
-                config.gamma = g
-                res[(a, g)] = eval_cfg(config, 200)
+    for a in alpha_range: 
+        for g in gamma_range:
+            config.alpha = a
+            config.gamma = g
+            res[(a, g)] = eval_cfg(config, 200)
+            with open(f"{name}.csv", "a") as f:
                 f.write(f"{a}, {g}, {res[(a, g)]}\n")
-                print(f"Evaluated (α:{a}, γ:{g}) [{len(res) / (len(alpha_range) * len(gamma_range)) * 100:.2F}%]")
+            print(f"Evaluated (α:{a}, γ:{g}) [{len(res) / (len(alpha_range) * len(gamma_range)) * 100:.2F}%]")
     make_chart(name)
     return res
     
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     #     config = QLCfg(
     #         epsilon = e,
     #         epsilon_decay = 1,
-    #         episodes = 2
+    #         episodes = 100
     #     )
     #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_static_epsilon_100_episodes")
 
@@ -112,31 +113,5 @@ if __name__ == "__main__":
     #         episodes = 100
     #     )
     #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_learning_rate_100_episodes")
-
-    # # epsilon decay 200 episodes
-    # for ed in epsilon_decay_range:
-    #     config = QLCfg(
-    #         epsilon_decay = ed,
-    #         episodes = 200
-    #     )
-    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_epsilon_decay_200_episodes")
-
-    # # static epsilon 200 episodes
-    # for e in static_epsilon_range:
-    #     config = QLCfg(
-    #         epsilon = e,
-    #         epsilon_decay = 1,
-    #         episodes = 200
-    #     )
-    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_static_epsilon_200_episodes")
-
-    # # learning rate 200 episodes
-    # for e in learning_rate_range:
-    #     config = QLCfg(
-    #         epsilon = e,
-    #         epsilon_decay = 1,
-    #         episodes = 200
-    #     )
-    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_learning_rate_200_episodes")
 
 # TODO: MAKE TRAINING SO IT SAVES LOWER EPISODES VERSION ALONG THE WAY
