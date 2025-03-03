@@ -33,7 +33,7 @@ from visualize import make_chart
 #   Too low: The algorithm may get stuck in suboptimal policies
 
 
-def eval_alpha_gamma(alpha_range: Tuple[float, ...], gamma_range: Tuple[float, ...], name: None):
+def eval_alpha_gamma(config: QLCfg, alpha_range: Tuple[float, ...], gamma_range: Tuple[float, ...], name: None):
     print('\nCreate alpha gamma chart')
     print(f"α range: {alpha_range}")
     print(f"γ range: {gamma_range}")
@@ -48,7 +48,9 @@ def eval_alpha_gamma(alpha_range: Tuple[float, ...], gamma_range: Tuple[float, .
         f.write("alpha, gamma, perf\n")
         for a in alpha_range: 
             for g in gamma_range:
-                res[(a, g)] = eval_cfg(QLCfg(alpha = a, gamma = g), 500)
+                config.alpha = a
+                config.gamma = g
+                res[(a, g)] = eval_cfg(config, 200)
                 f.write(f"{a}, {g}, {res[(a, g)]}\n")
                 print(f"Evaluated (α:{a}, γ:{g}) [{len(res) / (len(alpha_range) * len(gamma_range)) * 100:.2F}%]")
     make_chart(name)
@@ -79,10 +81,62 @@ if __name__ == "__main__":
     # )
 
     # alpha, gamma
-    alpha_range = (0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 0.999)
-    gamma_range = (0.001, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.9, 0.9, 0.99, 0.999)
-    range_mini = (0.1, 0.5, 0.9)
- 
-    # print(eval_alpha_gamma(range_mini, range_mini))
-    print(eval_alpha_gamma(alpha_range, gamma_range, "20_(18_18)_20_episodes"))
-    
+    alpha_range = (0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99)
+    gamma_range = (0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99)
+    static_epsilon_range = (0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1)
+    epsilon_decay_range = (0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999)
+    learning_rate_range = (0.01, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99)
+
+    # static epsilon 100 episodes
+    # for e in static_epsilon_range:
+    #     config = QLCfg(
+    #         epsilon = e,
+    #         epsilon_decay = 1,
+    #         episodes = 2
+    #     )
+    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_static_epsilon_100_episodes")
+
+    # # epsilon decay 100 episodes
+    # for ed in epsilon_decay_range:
+    #     config = QLCfg(
+    #         epsilon_decay = ed,
+    #         episodes = 100
+    #     )
+    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_epsilon_decay_100_episodes")
+
+    # # learning rate 100 episodes
+    # for e in learning_rate_range:
+    #     config = QLCfg(
+    #         epsilon = e,
+    #         epsilon_decay = 1,
+    #         episodes = 100
+    #     )
+    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_learning_rate_100_episodes")
+
+    # # epsilon decay 200 episodes
+    # for ed in epsilon_decay_range:
+    #     config = QLCfg(
+    #         epsilon_decay = ed,
+    #         episodes = 200
+    #     )
+    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_epsilon_decay_200_episodes")
+
+    # # static epsilon 200 episodes
+    # for e in static_epsilon_range:
+    #     config = QLCfg(
+    #         epsilon = e,
+    #         epsilon_decay = 1,
+    #         episodes = 200
+    #     )
+    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_static_epsilon_200_episodes")
+
+    # # learning rate 200 episodes
+    # for e in learning_rate_range:
+    #     config = QLCfg(
+    #         epsilon = e,
+    #         epsilon_decay = 1,
+    #         episodes = 200
+    #     )
+    #     eval_alpha_gamma(config, alpha_range, gamma_range, "def_learning_rate_200_episodes")
+
+# TODO: MAKE TRAINING SO IT SAVES LOWER EPISODES VERSION ALONG THE WAY

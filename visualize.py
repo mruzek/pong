@@ -33,4 +33,4 @@ def make_chart(name):
     plt.ylabel('Alpha')
     plt.tight_layout()
     plt.savefig(f"{name}.png")
-    plt.show()
+#    plt.show()
