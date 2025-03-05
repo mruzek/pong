@@ -1,8 +1,7 @@
-import csv
 from datetime import datetime
-import sys
 from typing import Dict, Tuple
-from q_learning_optimized import QLCfg, QLOptimized
+from q_learning.q_learning_optimized import QLOptimized
+from q_learning.types import QLCfg
 from visualize import make_chart
 
 # TODO: BATCH TEST
