@@ -1,8 +1,11 @@
 import time
-from q_learning.deep_q_learning import DQL
+from q_learning.q_learning_deep import DQL
 from q_learning.q_learning import QL
 from q_learning.q_learning_optimized import QLOptimized
 from q_learning.types import QLCfg
+import vid_to_ascii as vta
+
+vta.play_ascii_video_console("intro.pkl")
 
 config_default = QLCfg(
     grid_size = 20,
