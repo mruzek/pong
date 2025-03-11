@@ -3,8 +3,11 @@ from dataclasses import dataclass
 import random
 from typing import Tuple, NewType, TypedDict
 from q_learning.types import QLCfg, State
+     
+# TODO: THIS IS COPYPASTE OF QLEARNING
+#       WILL BE UPDATED SOON
 
-class QL:
+class DQL:
     def __init__(self, cfg: QLCfg):
         self.cfg = cfg
         self.actions = ('u', 'd', 'l', 'r')
@@ -12,8 +15,6 @@ class QL:
         self.q_delta = 999
 
     def train(self):
-        # training loop
-        #print("Training starts")
         if self.cfg.q_delta_threshold:
             episode = 0
             prev_q_table = copy.deepcopy(self.q_table)
@@ -28,8 +29,6 @@ class QL:
                 prev_q_table = copy.deepcopy(self.q_table)
                 print(f"Ep.{episode}: ε:{self.cfg.epsilon} | qδ: {self.q_delta}")
                 episode += 1
-                # episode count ++
-                # I gusee this can be written with episode loop more elegantly
         else:
             for episode in range(self.cfg.episodes):
                 print(f"Ep.{episode}: ε:{self.cfg.epsilon}")
@@ -40,31 +39,17 @@ class QL:
         done = False # finish flag
 
         while not done:
-            # choose action    
-                # epsilon greedy strategy
-                # TODO: Softmax (Boltzmann Exploration)
-                # TODO: Upper Confidence Bound
-                # TODO: Thompson Sampling
             if random.random() < self.cfg.epsilon:
                 action = random.choice(self.actions)
             else:
                 action = max(self.q_table[state], key=self.q_table[state].get)
-                # NOTE : fixes the issue when first was selected if max are multiple
                 max_val = max(self.q_table[state].values())
                 best_actions = [a for a, v in self.q_table[state].items() if abs(v - max_val) < 1e-10]
                 action = random.choice(best_actions)
-             # do action
-            next_state: State = self.get_next_state(state, action)
 
-            # reward system
-                # NOTE: this is correct because next state = goal means, correct action was chosen in current state 
-                #       reward is for making action from the state, not for being in a state 
+            next_state: State = self.get_next_state(state, action)
             reward = 1 if next_state == self.cfg.goal else self.cfg.step_reward
 
-            # populate Qtable = Bellman formula
-                # TODO: try n step
-                # TODO: try monte carlo
-                # TODO: try TD(λ)
             self.q_table[state][action] = self.q_table[state][action] + self.cfg.alpha * (
                 reward + self.cfg.gamma * max(self.q_table[next_state].values()) - self.q_table[state][action]
             )
@@ -105,4 +90,3 @@ class QL:
         if action == 'r' and state[0] < self.cfg.grid_size - 1:
             return (state[0]+1,state[1])
         return (state[0], state[1])
-    
